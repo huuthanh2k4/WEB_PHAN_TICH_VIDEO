@@ -81,10 +81,17 @@ from nltk.stem import WordNetLemmatizer
 #         return cls.fun_stemlem(t)
 
 
-import re
-import string
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+# Đảm bảo NLTK data cần thiết được tải
+# Tải stopwords và wordnet nếu chưa có
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
+
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet')
 
 # Các hàm xử lý bên ngoài (có thể gọi trực tiếp hoặc gói trong class)
 def decontracted(st):
