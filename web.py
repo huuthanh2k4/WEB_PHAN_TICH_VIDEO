@@ -11,6 +11,15 @@ from transformers import pipeline
 from yt_dlp import YoutubeDL
 from NPL.tien_xu_ly import TienXuLy
 
+# --- Thêm ffmpeg_static vào PATH để Whisper tìm được ffmpeg ---
+ffmpeg_dir = os.path.join(os.getcwd(), "ffmpeg_static")
+if os.path.isdir(ffmpeg_dir):
+    os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
+    os.environ["FFMPEG_BINARY"] = os.path.join(ffmpeg_dir, "ffmpeg")
+
+st.set_page_config(page_title="Subtitle & Emotion Analyzer", layout="wide")
+st.title("🎬 Phân tích phụ đề & cảm xúc từ video")
+
 st.set_page_config(page_title="Subtitle & Emotion Analyzer", layout="wide")
 st.title("🎬 Phân tích phụ đề & cảm xúc từ video")
 
