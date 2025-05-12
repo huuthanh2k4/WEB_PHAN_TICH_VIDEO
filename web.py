@@ -20,9 +20,6 @@ if os.path.isdir(ffmpeg_dir):
 st.set_page_config(page_title="Subtitle & Emotion Analyzer", layout="wide")
 st.title("🎬 Phân tích phụ đề & cảm xúc từ video")
 
-st.set_page_config(page_title="Subtitle & Emotion Analyzer", layout="wide")
-st.title("🎬 Phân tích phụ đề & cảm xúc từ video")
-
 # --- Utility: download any video URL to MP4 via yt-dlp ---
 def download_video(url: str, out_dir: str = "temp_video") -> str:
     os.makedirs(out_dir, exist_ok=True)
@@ -77,7 +74,6 @@ elif mode == "Nhập URL":
         st.warning("Vui lòng nhập URL để tiếp tục.")
         st.stop()
 
-    # 2) Download video safely to disk (stream, avoid RAM blow-up)
     try:
         with st.spinner("⏳ Đang tải video..."):
             video_path = download_video(url)
