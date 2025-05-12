@@ -1,0 +1,2 @@
+ffmpeg_static/ffmpeg filter=lfs diff=lfs merge=lfs -text
+ffmpeg_static/ffprobe filter=lfs diff=lfs merge=lfs -text
