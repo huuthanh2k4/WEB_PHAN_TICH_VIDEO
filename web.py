@@ -14,6 +14,17 @@ from NPL.tien_xu_ly import TienXuLy
 # --- Thêm ffmpeg_static vào PATH để Whisper tìm được ffmpeg ---
 ffmpeg_dir = os.path.join(os.getcwd(), "ffmpeg_static")
 if os.path.isdir(ffmpeg_dir):
+    ffmpeg_path = os.path.join(ffmpeg_dir, "ffmpeg")
+    ffprobe_path = os.path.join(ffmpeg_dir, "ffprobe")
+    # Thiết lập quyền thực thi
+    try:
+        os.chmod(ffmpeg_path, 0o755)
+        os.chmod(ffprobe_path, 0o755)
+    except Exception:
+        pass
+    # Thêm vào PATH và biến môi trường
+    os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
+    os.environ["FFMPEG_BINARY"] = ffmpeg_path(ffmpeg_dir):
     os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
     os.environ["FFMPEG_BINARY"] = os.path.join(ffmpeg_dir, "ffmpeg")
 
