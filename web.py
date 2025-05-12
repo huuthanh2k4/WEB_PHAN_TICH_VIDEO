@@ -1,3 +1,39 @@
+
+import os
+import sys
+import tarfile
+import tempfile
+from urllib.request import urlretrieve
+
+# 1) Xác định thư mục để lưu ffmpeg
+ffmpeg_dir = os.path.join(tempfile.gettempdir(), "ffmpeg_static")
+ffmpeg_bin = os.path.join(ffmpeg_dir, "ffmpeg")
+ffprobe_bin = os.path.join(ffmpeg_dir, "ffprobe")
+
+if not os.path.exists(ffmpeg_bin):
+    os.makedirs(ffmpeg_dir, exist_ok=True)
+    # 2) Download file tar.xz từ web
+    url = "https://johnvansickle.com/ffmpeg/builds/ffmpeg-release-amd64-static.tar.xz"
+    archive_path = os.path.join(ffmpeg_dir, "ffmpeg.tar.xz")
+    print("⏬ Downloading FFmpeg…")
+    urlretrieve(url, archive_path)
+    # 3) Giải nén chỉ lấy ffmpeg & ffprobe
+    print("🗜️ Extracting FFmpeg…")
+    with tarfile.open(archive_path, mode="r:xz") as tar:
+        for member in tar.getmembers():
+            name = os.path.basename(member.name)
+            if name in ("ffmpeg", "ffprobe"):
+                member.name = name  # strip folder
+                tar.extract(member, path=ffmpeg_dir)
+    os.remove(archive_path)
+
+# 4) Thêm vào PATH
+os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
+os.environ["FFMPEG_BINARY"] = ffmpeg_bin
+
+
+
+
 import os
 import time
 import tempfile
