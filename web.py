@@ -1,12 +1,4 @@
 import os, time, tempfile, shutil
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import whisper
-import joblib
-from transformers.pipelines import pipeline
-from yt_dlp import YoutubeDL
-from NPL.tien_xu_ly import TienXuLy
 
 import imageio_ffmpeg
 
@@ -20,6 +12,14 @@ os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
 # Nếu Whisper hay yt-dlp cần biến env riêng:
 os.environ["FFMPEG_BINARY"] = ffmpeg_exe
 
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import whisper
+import joblib
+from transformers.pipelines import pipeline
+from yt_dlp import YoutubeDL
+from NPL.tien_xu_ly import TienXuLy
 
 # 0) UI tối thiểu để health-check pass ngay
 st.set_page_config(page_title="Subtitle & Emotion Analyzer", layout="wide")
