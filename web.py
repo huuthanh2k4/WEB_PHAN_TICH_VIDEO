@@ -46,7 +46,7 @@ def download_video(url: str, out_dir: str = "temp_video") -> str:
 # --- Cache heavy resources to speed up reruns ---
 @st.cache_resource(show_spinner=False)
 def load_whisper_model():
-    return whisper.load_model("base")
+    return whisper.load_model("small")
 
 @st.cache_resource(show_spinner=False)
 def load_translator(src_lang: str):
