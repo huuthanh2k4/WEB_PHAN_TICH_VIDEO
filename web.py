@@ -98,6 +98,22 @@ if not video_path:
 else:
     st.sidebar.success(f"✔️ Sẵn sàng xử lý: {os.path.basename(video_path)}")
 
+# --- Reset state khi người dùng chọn video mới ---
+if "last_video" not in st.session_state:
+    st.session_state.last_video = None
+
+# Khi có path mới và khác path cũ => xoá session, xoá cache temp
+if video_path and st.session_state.last_video != video_path:
+    # 1) Xoá các biến session cũ
+    for key in list(st.session_state.keys()):
+        if key not in ("last_video",):
+            del st.session_state[key]
+    # 2) Xoá thư mục tạm (nếu có)
+    if os.path.isdir("temp_video"):
+        shutil.rmtree("temp_video", ignore_errors=True)
+    # 3) Đánh dấu video hiện tại là "đã dùng"
+    st.session_state.last_video = video_path
+
 # Start timing
 t0 = time.perf_counter()
 
