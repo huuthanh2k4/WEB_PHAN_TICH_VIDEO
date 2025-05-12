@@ -16,13 +16,11 @@ ffmpeg_dir = os.path.join(os.getcwd(), "ffmpeg_static")
 ffmpeg_path = os.path.join(ffmpeg_dir, "ffmpeg")
 ffprobe_path = os.path.join(ffmpeg_dir, "ffprobe")
 if os.path.isfile(ffmpeg_path) and os.path.isfile(ffprobe_path):
-    # Thiết lập quyền thực thi
     try:
         os.chmod(ffmpeg_path, 0o755)
         os.chmod(ffprobe_path, 0o755)
     except Exception:
         pass
-    # Thêm ffmpeg vào PATH và biến môi trường
     os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
     os.environ["FFMPEG_BINARY"] = ffmpeg_path
 
@@ -60,7 +58,7 @@ def load_tfidf_model():
 def load_svc_model():
     return joblib.load("Model đã huấn luyện/svc_model.pkl")
 
-# Load once
+# Load models & processor once
 whisper_model = load_whisper_model()
 processor     = TienXuLy()
 tfidf_model    = load_tfidf_model()
@@ -74,52 +72,40 @@ video_path = None
 if mode == "Tải lên file":
     uploaded = st.sidebar.file_uploader("Chọn video (.mp4/.mov/.avi)", type=["mp4", "mov", "avi"])
     if uploaded:
-        # Lưu file tạm thời
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmpfile:
-            tmpfile.write(uploaded.read())
-            video_path = tmpfile.name
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+            tmp.write(uploaded.read())
+            video_path = tmp.name
 elif mode == "Nhập URL":
-    url = st.text_input("Nhập link video (YouTube, TikTok, Vimeo, ...):")
-    if not url:
-        st.warning("Vui lòng nhập URL để tiếp tục.")
-        st.stop()
-
-    try:
-        with st.spinner("⏳ Đang tải video..."):
-            video_path = download_video(url)
-        st.success(f"✔️ Đã tải về: {os.path.basename(video_path)}")
-    except Exception as e:
-        st.error(f"❌ Tải video thất bại. Vui lòng kiểm tra lại link.\nChi tiết lỗi: {e}")
-        st.stop()
+    url = st.sidebar.text_input("Nhập link video (YouTube, TikTok, Vimeo, ...):")
+    if url:
+        try:
+            with st.spinner("⏳ Đang tải video..."):
+                video_path = download_video(url)
+            st.sidebar.success(f"✔️ Đã tải về: {os.path.basename(video_path)}")
+        except Exception as e:
+            st.sidebar.error(f"❌ Tải video thất bại: {e}")
+            st.stop()
 
 if not video_path:
     st.sidebar.warning("Vui lòng cung cấp video để bắt đầu.")
     st.stop()
 else:
-    st.sidebar.success(f"✔️ Sẵn sàng xử lý: {os.path.basename(video_path)}")
+    st.sidebar.success(f"✔️ Đã chọn video: {os.path.basename(video_path)}")
 
 # --- Auto-reset khi người dùng chọn video mới ---
 if "last_video" not in st.session_state:
     st.session_state.last_video = None
 
 if video_path and st.session_state.last_video != video_path:
-    # 1) Xoá tất cả state cũ (trừ last_video)
+    # Xóa mọi state cũ trừ last_video
     for key in list(st.session_state.keys()):
         if key != "last_video":
             del st.session_state[key]
-    # 2) Cập nhật last_video
     st.session_state.last_video = video_path
 
-# --- Button để phân tích video mới ---
-if st.button("🔄 Phân tích video mới"):
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.experimental_rerun()
-    
-# Start timing
+# --- Start processing ---
 t0 = time.perf_counter()
 
-# 2) Whisper transcription
 st.header("2. Transcription")
 with st.spinner("⏳ Đang chạy Whisper transcription..."):
     transcription = whisper_model.transcribe(video_path)
@@ -127,7 +113,6 @@ segments = transcription["segments"]
 lang = transcription["language"]
 st.write(f"🔤 Phát hiện ngôn ngữ: **{lang}**")
 
-# 3) Optional translation to English
 if lang != "en":
     st.header("3. Translation")
     with st.spinner("⏳ Đang dịch sang tiếng Anh..."):
@@ -138,7 +123,6 @@ if lang != "en":
             except:
                 seg["text"] = "[Lỗi dịch thuật]"
 
-# 4) Build DataFrame & preprocess text
 st.header("4. Build DataFrame & Preprocessing")
 records = []
 for seg in segments:
@@ -152,7 +136,6 @@ for seg in segments:
 df = pd.DataFrame(records)
 st.dataframe(df, use_container_width=True)
 
-# 5) TF-IDF encoding and SVC prediction
 st.header("5. Emotion Classification")
 with st.spinner("⏳ Mã hoá TF-IDF và dự đoán cảm xúc..."):
     X = tfidf_model.transform(df["text"])
@@ -165,19 +148,15 @@ label_map = {
 df["Cảm xúc"] = pd.Series(preds.astype(str)).map(label_map)
 st.dataframe(df[["start", "end", "text", "Cảm xúc"]], use_container_width=True)
 
-# End timing
 t1 = time.perf_counter()
 elapsed = t1 - t0
 if elapsed < 60:
-    st.success(f"✅ Hoàn thành toàn bộ pipeline trong **{elapsed:.2f} giây**")
+    st.success(f"✅ Hoàn thành trong **{elapsed:.2f} giây**")
 else:
-    minutes = elapsed / 60
-    st.success(f"✅ Hoàn thành toàn bộ pipeline trong **{minutes:.2f} phút**")
+    st.success(f"✅ Hoàn thành trong **{elapsed/60:.2f} phút**")
 
-# 6) Statistics & Visualization
 st.header("6. Thống kê Cảm xúc")
 counts = df["Cảm xúc"].value_counts()
-
 fig1, ax1 = plt.subplots()
 explode = [0.1 if v/counts.sum() < 0.1 else 0 for v in counts.values]
 ax1.pie(counts.values, labels=counts.index, explode=explode,
@@ -193,17 +172,21 @@ ax2.set_ylabel("Số lượng")
 ax2.set_title("Số lượng mỗi cảm xúc")
 st.pyplot(fig2)
 
-# 7) Download results as CSV
-st.header("Tải về kết quả")
+st.header("7. Tải về kết quả")
 csv_data = df.to_csv(index=False, encoding="utf-8-sig")
-st.download_button(
-    label="📥 Tải CSV",
-    data=csv_data,
-    file_name=f"{os.path.splitext(os.path.basename(video_path))[0]}_subtitles.csv",
-    mime="text/csv"
-)
+st.download_button("📥 Tải CSV", data=csv_data,
+                   file_name=f"{os.path.splitext(os.path.basename(video_path))[0]}_subtitles.csv",
+                   mime="text/csv")
 
-# Xóa file tạm thời nếu là file upload
+# --- Nút reset toàn bộ để phân tích video mới ---
+if st.button("🔄 Phân tích video mới", key="reset_btn"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    if os.path.isdir("temp_video"):
+        shutil.rmtree("temp_video", ignore_errors=True)
+    st.experimental_rerun()
+
+# --- Cleanup file tạm nếu là upload ---
 if mode == "Tải lên file" and video_path:
     os.remove(video_path)
 elif mode == "Nhập URL" and video_path:
