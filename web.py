@@ -13,20 +13,19 @@ from NPL.tien_xu_ly import TienXuLy
 
 # --- Thêm ffmpeg_static vào PATH để Whisper tìm được ffmpeg ---
 ffmpeg_dir = os.path.join(os.getcwd(), "ffmpeg_static")
-if os.path.isdir(ffmpeg_dir):
-    ffmpeg_path = os.path.join(ffmpeg_dir, "ffmpeg")
-    ffprobe_path = os.path.join(ffmpeg_dir, "ffprobe")
+ffmpeg_path = os.path.join(ffmpeg_dir, "ffmpeg")
+ffprobe_path = os.path.join(ffmpeg_dir, "ffprobe")
+if os.path.isfile(ffmpeg_path) and os.path.isfile(ffprobe_path):
     # Thiết lập quyền thực thi
     try:
         os.chmod(ffmpeg_path, 0o755)
         os.chmod(ffprobe_path, 0o755)
     except Exception:
         pass
-    # Thêm vào PATH và biến môi trường
+    # Thêm ffmpeg vào PATH và biến môi trường
     os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
-    os.environ["FFMPEG_BINARY"] = ffmpeg_path(ffmpeg_dir):
-    os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
-    os.environ["FFMPEG_BINARY"] = os.path.join(ffmpeg_dir, "ffmpeg")
+    os.environ["FFMPEG_BINARY"] = ffmpeg_path
+
 
 st.set_page_config(page_title="Subtitle & Emotion Analyzer", layout="wide")
 st.title("🎬 Phân tích phụ đề & cảm xúc từ video")
