@@ -8,6 +8,19 @@ from transformers.pipelines import pipeline
 from yt_dlp import YoutubeDL
 from NPL.tien_xu_ly import TienXuLy
 
+import imageio_ffmpeg
+
+# Lấy đường dẫn binary ffmpeg vừa cài qua pip
+ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+
+# Thêm thư mục chứa ffmpeg vào PATH
+ffmpeg_dir = os.path.dirname(ffmpeg_exe)
+os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
+
+# Nếu Whisper hay yt-dlp cần biến env riêng:
+os.environ["FFMPEG_BINARY"] = ffmpeg_exe
+
+
 # 0) UI tối thiểu để health-check pass ngay
 st.set_page_config(page_title="Subtitle & Emotion Analyzer", layout="wide")
 st.title("🎬 Phân tích phụ đề & cảm xúc từ video")
