@@ -3,7 +3,8 @@ pandas==2.2.2
 matplotlib==3.9.2
 openai-whisper==20240930
 joblib==1.4.2
-transformers==4.51.3
+transformers
+sentencepiece
 torch==2.7.0
 yt-dlp==2025.4.30
 nltk==3.9.1
