@@ -15,7 +15,7 @@ st.title("🎬 Phân tích phụ đề & cảm xúc từ video")
 # --- 1) Định nghĩa cache resources, nhưng **không load** ngay ---
 @st.cache_resource(show_spinner=False)
 def get_whisper_model():
-    return whisper.load_model("medium")
+    return whisper.load_model("base")
 
 @st.cache_resource(show_spinner=False)
 def get_translator(src_lang: str):
