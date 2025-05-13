@@ -62,10 +62,15 @@ def load_svc_model():
 def load_svc_max():
     return joblib.load("Model đã huấn luyện/SVC_MAX.sav")
 
+@st.cache_resource(show_spinner=False)
+def load_tfidf_model1():
+    return joblib.load("Model đã huấn luyện/TF-IDF1.sav")
+
 # Load models & processor once
 whisper_model = load_whisper_model()
 processor     = TienXuLy()
-tfidf_model    = load_tfidf_model()
+tfidf_model1    = load_tfidf_model()
+tfidf_mode2    = load_tfidf_mode1l()
 svc_model      = load_svc_model()
 svc_max       =  load_svc_max()
 
@@ -82,9 +87,10 @@ chon_model = st.sidebar.radio(
 
 if chon_model == "phân loại 1 có 7 loại" :
     chon_model = svc_max
+    tfidf_model = tfidf_model1
 elif chon_model == "phân loại 2 có 6 loại" :
     chon_model = svc_model
-
+    tfidf_model = tfidf_model2
 
 video_path = None
 if mode == "Tải lên file":
