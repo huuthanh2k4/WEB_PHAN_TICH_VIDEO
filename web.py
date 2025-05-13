@@ -82,7 +82,7 @@ chon_model = st.sidebar.radio(
 
 if chon_model == "phân loại 1 có 7 loại" :
     chon_model = svc_max
-elif chon_model == "phân loại 2 có 6 loại"
+elif chon_model == "phân loại 2 có 6 loại" :
     chon_model = svc_model
 
 
