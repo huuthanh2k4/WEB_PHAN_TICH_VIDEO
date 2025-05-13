@@ -70,7 +70,7 @@ def load_tfidf_model1():
 whisper_model = load_whisper_model()
 processor     = TienXuLy()
 tfidf_model1    = load_tfidf_model()
-tfidf_mode2    = load_tfidf_model1()
+tfidf_model2    = load_tfidf_model1()
 svc_model      = load_svc_model()
 svc_max       =  load_svc_max()
 
