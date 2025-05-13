@@ -87,10 +87,10 @@ chon_model = st.sidebar.radio(
 
 if chon_model == "phân loại 1 có 7 loại" :
     chon_model = svc_max
-    tfidf_model = tfidf_model1
+    tfidf = tfidf_model1
 elif chon_model == "phân loại 2 có 6 loại" :
     chon_model = svc_model
-    tfidf_model = tfidf_model2
+    tfidf = tfidf_model2
 
 video_path = None
 if mode == "Tải lên file":
@@ -143,14 +143,14 @@ if lang != "en":
         translator = load_translator(lang)
         for seg in segments:
             try:
-                seg["text"] = translator(seg["text"])[0]["translation_text"]
+                seg["phụ đề"] = translator(seg["phụ đề"])[0]["translation_text"]
             except:
-                seg["text"] = "[Lỗi dịch thuật]"
+                seg["phụ đề"] = "[Lỗi dịch thuật]"
 
 st.header("4. Build DataFrame & Preprocessing")
 records = []
 for seg in segments:
-    txt = seg["text"].strip()
+    txt = seg["phụ đề"].strip()
     records.append({
         "start":    seg["start"],
         "end":      seg["end"],
@@ -162,7 +162,7 @@ st.dataframe(df, use_container_width=True)
 
 st.header("5. Emotion Classification")
 with st.spinner("⏳ Mã hoá TF-IDF và dự đoán cảm xúc..."):
-    X = tfidf_model.transform(df["xử lý phụ đề cho model"])
+    X = tfidf.transform(df["xử lý phụ đề cho model"])
     preds = chon_model.predict(X)
 label_map = {
     "0": "buồn",    "1": "vui",    "2": "yêu",
@@ -170,7 +170,7 @@ label_map = {
     "6": "ko chứa cảm xúc"
 }
 df["Cảm xúc"] = pd.Series(preds.astype(str)).map(label_map)
-st.dataframe(df[["start", "end", "text", "Cảm xúc"]], use_container_width=True)
+st.dataframe(df[["start", "end", "phụ đề", "Cảm xúc"]], use_container_width=True)
 
 t1 = time.perf_counter()
 elapsed = t1 - t0
