@@ -58,15 +58,33 @@ def load_tfidf_model():
 def load_svc_model():
     return joblib.load("Model đã huấn luyện/svc_model.pkl")
 
+@st.cache_resource(show_spinner=False)
+def load_svc_max():
+    return joblib.load("Model đã huấn luyện/SVC_MAX.sav")
+
 # Load models & processor once
 whisper_model = load_whisper_model()
 processor     = TienXuLy()
 tfidf_model    = load_tfidf_model()
 svc_model      = load_svc_model()
+svc_max       =  load_svc_max()
 
 # --- Sidebar: choose input method ---
 st.sidebar.header("1. Chọn nguồn video")
 mode = st.sidebar.radio("Chọn:", ("Tải lên file", "Nhập URL"))
+
+
+st.sidebar.header("Chọn model để xử lý")
+chon_model = st.sidebar.radio(
+    "Model:",
+    ("phân loại 1 có 7 loại", "phân loại 2 có 6 loại")
+)
+
+if chon_model == "phân loại 1 có 7 loại" :
+    chon_model = svc_max
+elif chon_model == "phân loại 2 có 6 loại"
+    chon_model = svc_model
+
 
 video_path = None
 if mode == "Tải lên file":
@@ -130,16 +148,16 @@ for seg in segments:
     records.append({
         "start":    seg["start"],
         "end":      seg["end"],
-        "text":     txt,
-        "features": processor.prepare_data(txt)
+        "phụ đề":     txt,
+        "xử lý phụ đề cho model": processor.prepare_data(txt)
     })
 df = pd.DataFrame(records)
 st.dataframe(df, use_container_width=True)
 
 st.header("5. Emotion Classification")
 with st.spinner("⏳ Mã hoá TF-IDF và dự đoán cảm xúc..."):
-    X = tfidf_model.transform(df["text"])
-    preds = svc_model.predict(X)
+    X = tfidf_model.transform(df["xử lý phụ đề cho model"])
+    preds = chon_model.predict(X)
 label_map = {
     "0": "buồn",    "1": "vui",    "2": "yêu",
     "3": "giận dữ", "4": "sợ hãi","5": "ngạc nhiên",
