@@ -81,20 +81,26 @@ from nltk.stem import WordNetLemmatizer
 #         return cls.fun_stemlem(t)
 
 
-# Đảm bảo NLTK data cần thiết được tải
-# Tải stopwords và wordnet nếu chưa có
+
+import re
+import string
+import nltk
+from nltk.stem import WordNetLemmatizer
+from pathlib import Path
+
+# Ensure needed NLTK corpora are downloaded
 try:
     nltk.data.find('corpora/stopwords')
 except LookupError:
-    nltk.download('stopwords')
+    nltk.download('stopwords', quiet=True)
 
 try:
     nltk.data.find('corpora/wordnet')
 except LookupError:
-    nltk.download('wordnet')
+    nltk.download('wordnet', quiet=True)
 
-# Các hàm xử lý bên ngoài (có thể gọi trực tiếp hoặc gói trong class)
-def decontracted(st):
+# External helper functions
+def decontracted(st: str) -> str:
     st = re.sub(r"won\'t", "will not", st)
     st = re.sub(r"can\'t", "can not", st)
     st = re.sub(r"n\'t", " not", st)
@@ -106,33 +112,22 @@ def decontracted(st):
     st = re.sub(r"\'m", " am", st)
     return st
 
-def clear_link(st):
+def clear_link(st: str) -> str:
     return re.sub(r'(https?://\S+|\S+@\S+)', '', st)
 
-def clear_punctuation(st):
+def clear_punctuation(st: str) -> str:
     punct_to_remove = string.punctuation.replace('#', '')
     table = str.maketrans('', '', punct_to_remove)
     return st.translate(table)
 
-def clear_stopwords(st, stop_set):
-    return " ".join(tok for tok in st.split() if tok not in stop_set)
-
-def black_txt(token, stop_set, my_sw):
-    return (token not in stop_set
-            and token not in my_sw
-            and token.isalpha())
-
-def fun_stemlem(st, wn, stop_set, my_sw):
-    cleaned = []
-    for w in st.split():
-        if black_txt(w.lower(), stop_set, my_sw):
-            cleaned.append(wn.lemmatize(w, pos='v'))
-    return " ".join(cleaned)
-
 class TienXuLy:
     def __init__(self):
+        # Lemmatizer
         self.wn = WordNetLemmatizer()
-        self.stop = set(stopwords.words('english'))
+        # Load stopwords from NLTK data file directly
+        sw_file = nltk.data.find('corpora/stopwords/english')
+        self.stop = set(Path(sw_file).read_text().splitlines())
+        # Custom stop tokens
         self.my_sw = ['rt', 'ht', 'fb', 'amp', 'gt']
 
     def decontracted(self, st: str) -> str:
@@ -145,15 +140,20 @@ class TienXuLy:
         return clear_punctuation(st)
 
     def clear_stopwords(self, st: str) -> str:
-        return clear_stopwords(st, self.stop)
+        return " ".join(tok for tok in st.split() if tok not in self.stop)
 
     def fun_stemlem(self, st: str) -> str:
-        return fun_stemlem(st, self.wn, self.stop, self.my_sw)
+        cleaned = []
+        for w in st.split():
+            lw = w.lower()
+            if lw.isalpha() and lw not in self.stop and lw not in self.my_sw:
+                cleaned.append(self.wn.lemmatize(lw, pos='v'))
+        return " ".join(cleaned)
 
     def prepare_data(self, text: str) -> str:
         """
-        Thực hiện full pipeline: lowercase, decontract, remove links,
-        remove punctuation (giữ '#'), loại stopwords, và lemmatization.
+        Full cleaning pipeline: lowercase, decontract, remove links,
+        remove punctuation (keeping '#'), remove stopwords, lemmatize.
         """
         text = text.lower()
         text = self.decontracted(text)
@@ -163,9 +163,3 @@ class TienXuLy:
         text = self.fun_stemlem(text)
         return text
 
-# Ví dụ thử nghiệm
-if __name__ == "__main__":
-    processor = TienXuLy()
-    s = "omg new track ❤️ I’m totally obsessed with this melody! #musiclove"
-    print("Trước xử lý:", s)
-    print("Sau xử lý :", processor.prepare_data(s))
