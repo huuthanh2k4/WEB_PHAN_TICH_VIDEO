@@ -1,4 +1,5 @@
-streamlit==1.45.0
+scikit-learn==1.5.1
+sacremoses
 pandas==2.2.2
 matplotlib==3.9.2
 openai-whisper==20240930
