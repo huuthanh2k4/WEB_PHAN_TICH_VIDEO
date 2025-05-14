@@ -103,11 +103,19 @@ elif chon_model == "phân loại 2 có 6 loại" :
     chon_model = svc_model
     tfidf = tfidf_model6
 
-video_path = None
 if mode == "Tải lên file":
-    uploaded = st.sidebar.file_uploader("Chọn video (.mp4/.mov/.avi)", type=["mp4", "mov", "avi"])
+    uploaded = st.sidebar.file_uploader(
+        "Chọn video hoặc audio", 
+        type=["mp4","mov","avi","mp3"]
+    )
     if uploaded:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+        # Chọn suffix dựa vào loại file
+        if uploaded.name.lower().endswith(".mp3"):
+            suffix = ".mp3"
+        else:
+            _, ext = os.path.splitext(uploaded.name)
+            suffix = ext or ".mp4"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(uploaded.read())
             video_path = tmp.name
 elif mode == "Nhập URL":
