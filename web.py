@@ -148,24 +148,27 @@ segments = transcription["segments"]
 lang = transcription["language"]
 st.write(f"🔤 Phát hiện ngôn ngữ: **{lang}**")
 
+# 3) Optional translation to English
 if lang != "en":
     st.header("3. Translation")
     with st.spinner("⏳ Đang dịch sang tiếng Anh..."):
         translator = load_translator(lang)
         for seg in segments:
             try:
-                seg["phụ đề"] = translator(seg["phụ đề"])[0]["translation_text"]
-            except:
-                seg["phụ đề"] = "[Lỗi dịch thuật]"
+                # Dịch trường 'text' của segment
+                seg["text"] = translator(seg["text"])[0]["translation_text"]
+            except Exception:
+                seg["text"] = "[Lỗi dịch thuật]"
 
+# 4) Build DataFrame & preprocess text
 st.header("4. Build DataFrame & Preprocessing")
 records = []
 for seg in segments:
-    txt = seg["phụ đề"].strip()
+    txt = seg["text"].strip()
     records.append({
         "start":    seg["start"],
         "end":      seg["end"],
-        "phụ đề":     txt,
+        "phụ đề":   txt,
         "xử lý phụ đề cho model": processor.prepare_data(txt)
     })
 df = pd.DataFrame(records)
