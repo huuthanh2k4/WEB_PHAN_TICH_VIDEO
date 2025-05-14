@@ -52,25 +52,25 @@ def load_translator(src_lang: str):
 
 @st.cache_resource(show_spinner=False)
 def load_tfidf_model():
-    return joblib.load("Model đã huấn luyện/TF-IDF.sav")
+    return joblib.load("TF-IDF6.sav")
 
 @st.cache_resource(show_spinner=False)
 def load_svc_model():
-    return joblib.load("Model đã huấn luyện/svc_model.pkl")
+    return joblib.load("SVC6.sav")
 
 @st.cache_resource(show_spinner=False)
 def load_svc_max():
-    return joblib.load("Model đã huấn luyện/SVC_MAX.sav")
+    return joblib.load("SVC7.sav")
 
 @st.cache_resource(show_spinner=False)
 def load_tfidf_model1():
-    return joblib.load("Model đã huấn luyện/TF-IDF1.sav")
+    return joblib.load("TF-IDF7.sav")
 
 # Load models & processor once
 whisper_model = load_whisper_model()
 processor     = TienXuLy()
-tfidf_model1    = load_tfidf_model()
-tfidf_model2    = load_tfidf_model1()
+tfidf_model6    = load_tfidf_model()
+tfidf_model7    = load_tfidf_model1()
 svc_model      = load_svc_model()
 svc_max       =  load_svc_max()
 
@@ -87,10 +87,10 @@ chon_model = st.sidebar.radio(
 
 if chon_model == "phân loại 1 có 7 loại" :
     chon_model = svc_max
-    tfidf = tfidf_model1
+    tfidf = tfidf_model7
 elif chon_model == "phân loại 2 có 6 loại" :
     chon_model = svc_model
-    tfidf = tfidf_model2
+    tfidf = tfidf_model6
 
 video_path = None
 if mode == "Tải lên file":
