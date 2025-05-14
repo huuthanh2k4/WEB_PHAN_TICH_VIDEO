@@ -9,5 +9,4 @@ sentencepiece
 torch==2.7.0
 yt-dlp==2025.4.30
 nltk==3.9.1
-scikit-learn
 imageio-ffmpeg
