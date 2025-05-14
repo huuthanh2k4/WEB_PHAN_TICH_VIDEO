@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import whisper
 import joblib
-from transformers import pipeline
+from transformers.pipelines import pipeline
 from yt_dlp import YoutubeDL
 from NPL.tien_xu_ly import TienXuLy
 
