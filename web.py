@@ -103,6 +103,7 @@ elif chon_model == "phân loại 2 có 6 loại" :
     chon_model = svc_model
     tfidf = tfidf_model6
 
+video_path = None
 if mode == "Tải lên file":
     uploaded = st.sidebar.file_uploader(
         "Chọn video hoặc audio", 
