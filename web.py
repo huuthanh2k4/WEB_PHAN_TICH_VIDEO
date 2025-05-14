@@ -10,6 +10,17 @@ import joblib
 from transformers.pipelines import pipeline
 from yt_dlp import YoutubeDL
 from NPL.tien_xu_ly import TienXuLy
+import warnings
+
+# --- Suppress non-critical Whisper / HF Hub warnings ---
+warnings.filterwarnings(
+    "ignore",
+    message="FP16 is not supported on CPU; using FP32 instead"
+)
+warnings.filterwarnings(
+    "ignore",
+    message="`resume_download` is deprecated and will be removed"
+)
 
 # --- Thêm ffmpeg_static vào PATH để Whisper tìm được ffmpeg ---
 ffmpeg_dir = os.path.join(os.getcwd(), "ffmpeg_static")
