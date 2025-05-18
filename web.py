@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import whisper
 import joblib
 from transformers.pipelines import pipeline
+from transformers import pipeline as hf_pipeline
 from yt_dlp import YoutubeDL
 from NPL.tien_xu_ly import TienXuLy
 import gdown
@@ -197,17 +198,30 @@ if lang != "en":
 
 # 4) Build DataFrame & preprocess text
 st.header("4. Build DataFrame & Preprocessing")
+vi_translator = hf_pipeline("translation", model="Helsinki-NLP/opus-mt-en-vi")
+
 records = []
 for seg in segments:
+    #Text đã được chuyển sang tiếng Anh nếu lang != 'en'
     txt = seg["text"].strip()
+
+    # Dịch sang tiếng Việt (nếu text gốc đã là tiếng Việt thì sẽ dịch lại chính nó, nhưng thường bạn chỉ dùng khi lang!='vi')
+    try:
+        viet = vi_translator(txt)[0]["translation_text"]
+    except Exception:
+        viet = "[Lỗi dịch sang tiếng Việt]"
+
     records.append({
-        "start":    seg["start"],
-        "end":      seg["end"],
-        "phụ đề":   txt,
-        "xử lý phụ đề cho model": processor.prepare_data(txt)
+        "start":                   seg["start"],
+        "end":                     seg["end"],
+        "phụ đề":                  txt,
+        "Tiếng Việt":              viet,                          # cột mới
+        "xử lý phụ đề cho model":  processor.prepare_data(txt)
     })
+
 df = pd.DataFrame(records)
 st.dataframe(df, use_container_width=True)
+
 
 st.header("5. Emotion Classification")
 with st.spinner("⏳ Mã hoá TF-IDF và dự đoán cảm xúc..."):
