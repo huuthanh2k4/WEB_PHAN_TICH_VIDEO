@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import whisper
 import joblib
 from transformers.pipelines import pipeline
-from transformers import pipeline as hf_pipeline
 from yt_dlp import YoutubeDL
 from NPL.tien_xu_ly import TienXuLy
 import gdown
