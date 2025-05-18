@@ -198,14 +198,13 @@ if lang != "en":
 
 # 4) Build DataFrame & preprocess text
 st.header("4. Build DataFrame & Preprocessing")
-vi_translator = hf_pipeline("translation", model="Helsinki-NLP/opus-mt-en-vi")
+vi_translator = pipeline("translation", model="Helsinki-NLP/opus-mt-en-vi")
 
 records = []
 for seg in segments:
-    #Text đã được chuyển sang tiếng Anh nếu lang != 'en'
     txt = seg["text"].strip()
 
-    # Dịch sang tiếng Việt (nếu text gốc đã là tiếng Việt thì sẽ dịch lại chính nó, nhưng thường bạn chỉ dùng khi lang!='vi')
+    # Dịch sang tiếng Việt
     try:
         viet = vi_translator(txt)[0]["translation_text"]
     except Exception:
@@ -215,7 +214,7 @@ for seg in segments:
         "start":                   seg["start"],
         "end":                     seg["end"],
         "phụ đề":                  txt,
-        "Tiếng Việt":              viet,                          # cột mới
+        "Tiếng Việt":              viet,
         "xử lý phụ đề cho model":  processor.prepare_data(txt)
     })
 
