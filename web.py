@@ -10,6 +10,7 @@ import joblib
 from transformers.pipelines import pipeline
 from yt_dlp import YoutubeDL
 from NPL.tien_xu_ly import TienXuLy
+import gdown
 import warnings
 
 # --- Suppress non-critical Whisper / HF Hub warnings ---
@@ -51,6 +52,27 @@ def download_video(url: str, out_dir: str = "temp_video") -> str:
     with YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         return ydl.prepare_filename(info)
+
+def download_from_drive(url: str, out_dir: str = "temp_video") -> str:
+    """
+    Nhận URL share của Google Drive, trả về đường dẫn tới file đã tải về.
+    """
+    # extract file id
+    m = re.search(r"/d/([a-zA-Z0-9_-]+)", url)
+    if not m:
+        st.error("URL Google Drive không đúng định dạng '/d/<file_id>/'")
+        st.stop()
+    file_id = m.group(1)
+    # xây direct link
+    download_url = f"https://drive.google.com/uc?id={file_id}"
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, file_id)  # tự đặt tên theo id
+    # gdown tự thêm đuôi file extension
+    gdown.download(download_url, out_path, quiet=False)
+    # nếu gdown không tự nhận extension, bạn có thể ép thêm:
+    # out_path = gdown.download(download_url, out_path + ".mp3", quiet=False)
+    return out_path
+    
 
 # --- Cache heavy resources to speed up reruns ---
 @st.cache_resource(show_spinner=False)
@@ -120,11 +142,14 @@ if mode == "Tải lên file":
             tmp.write(uploaded.read())
             video_path = tmp.name
 elif mode == "Nhập URL":
-    url = st.sidebar.text_input("Nhập link video (YouTube, TikTok, Vimeo, ...):")
+    url = st.sidebar.text_input("Nhập link video (YouTube/TikTok/Vimeo/... hoặc Google Drive):")
     if url:
         try:
-            with st.spinner("⏳ Đang tải video..."):
-                video_path = download_video(url)
+            with st.spinner("⏳ Đang tải về..."):
+                if "drive.google.com" in url:
+                    video_path = download_from_drive(url)
+                else:
+                    video_path = download_video(url)
             st.sidebar.success(f"✔️ Đã tải về: {os.path.basename(video_path)}")
         except Exception as e:
             st.sidebar.error(f"❌ Tải video thất bại: {e}")
