@@ -199,9 +199,6 @@ st.header("2. Transcription")
 with st.spinner("⏳ Đang chạy Whisper transcription..."):
     audio_wav = extract_audio_to_wav(video_path)
     transcription = whisper_model.transcribe(audio_wav)
-# Debug: in ra keys và toàn bộ transcription
-st.write("DEBUG: transcription keys:", list(transcription.keys()))
-st.write("DEBUG: transcription content:", transcription)
 segments = transcription["segments"]
 lang = transcription["language"]
 st.write(f"🔤 Phát hiện ngôn ngữ: **{lang}**")
