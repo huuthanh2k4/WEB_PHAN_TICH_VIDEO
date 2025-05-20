@@ -14,7 +14,7 @@ from NPL.tien_xu_ly import TienXuLy
 import gdown
 import warnings
 
-# --- Suppress non-critical Whisper / HF Hub warnings ---
+# Loại bỏ các cảnh báo 
 warnings.filterwarnings(
     "ignore",
     message="FP16 is not supported on CPU; using FP32 instead"
@@ -41,7 +41,7 @@ if os.path.isfile(ffmpeg_path) and os.path.isfile(ffprobe_path):
 st.set_page_config(page_title="Subtitle & Emotion Analyzer", layout="wide")
 st.title("🎬 Phân tích phụ đề & cảm xúc từ video")
 
-# --- Utility: download any video URL to MP4 via yt-dlp ---
+# Tải video từ các link tạm thời
 def download_video(url: str, out_dir: str = "temp_video") -> str:
     os.makedirs(out_dir, exist_ok=True)
     ydl_opts = {
@@ -70,7 +70,7 @@ def download_from_drive(url: str, out_dir: str = "temp_video") -> str:
     out_path = os.path.join(out_dir, file_id)  # tự đặt tên theo id
     # gdown tự thêm đuôi file extension
     gdown.download(download_url, out_path, quiet=False)
-    # nếu gdown không tự nhận extension, bạn có thể ép thêm:
+    # nếu gdown không tự nhận extension,có thể ép thêm:
     # out_path = gdown.download(download_url, out_path + ".mp3", quiet=False)
     return out_path
     
@@ -162,7 +162,7 @@ if not video_path:
 else:
     st.sidebar.success(f"✔️ Đã chọn video: {os.path.basename(video_path)}")
 
-# --- Auto-reset khi người dùng chọn video mới ---
+# Tự động reset khi người dùng muốn phân tích 1 video khác
 if "last_video" not in st.session_state:
     st.session_state.last_video = None
 
@@ -173,7 +173,6 @@ if video_path and st.session_state.last_video != video_path:
             del st.session_state[key]
     st.session_state.last_video = video_path
 
-# --- Start processing ---
 t0 = time.perf_counter()
 
 st.header("2. Transcription")
@@ -183,7 +182,7 @@ segments = transcription["segments"]
 lang = transcription["language"]
 st.write(f"🔤 Phát hiện ngôn ngữ: **{lang}**")
 
-# 3) Optional translation to English
+# dịch toàn bộ ngôn ngữ sang tiếng anh
 if lang != "en":
     st.header("3. Translation")
     with st.spinner("⏳ Đang dịch sang tiếng Anh..."):
