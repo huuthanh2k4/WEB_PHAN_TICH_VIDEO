@@ -73,6 +73,25 @@ def download_from_drive(url: str, out_dir: str = "temp_video") -> str:
     # nếu gdown không tự nhận extension,có thể ép thêm:
     # out_path = gdown.download(download_url, out_path + ".mp3", quiet=False)
     return out_path
+
+def extract_audio_to_wav(video_path: str, wav_path: str = "temp_audio.wav") -> str:
+    """
+    Dùng ffmpeg để trích audio từ video/mp3 sang WAV 16kHz mono.
+    Trả về đường dẫn file WAV.
+    """
+    cmd = [
+        ffmpeg_path,  # đường dẫn tuyệt đối tới ffmpeg của bạn
+        "-i", video_path,
+        "-vn",                    # bỏ video
+        "-acodec", "pcm_s16le",   # 16-bit PCM
+        "-ar", "16000",           # sample rate 16 kHz
+        "-ac", "1",               # mono
+        wav_path,
+        "-y"
+    ]
+    subprocess.run(cmd, check=True)
+    return wav_path
+
     
 
 # --- Cache heavy resources to speed up reruns ---
@@ -177,7 +196,11 @@ t0 = time.perf_counter()
 
 st.header("2. Transcription")
 with st.spinner("⏳ Đang chạy Whisper transcription..."):
-    transcription = whisper_model.transcribe(video_path)
+    audio_wav = extract_audio_to_wav(video_path)
+    transcription = whisper_model.transcribe(audio_wav)
+# Debug: in ra keys và toàn bộ transcription
+st.write("DEBUG: transcription keys:", list(transcription.keys()))
+st.write("DEBUG: transcription content:", transcription)
 segments = transcription["segments"]
 lang = transcription["language"]
 st.write(f"🔤 Phát hiện ngôn ngữ: **{lang}**")
